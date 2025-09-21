@@ -57,7 +57,11 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
-        .btn:hover {
+        .btn:disabled {
+            background-color: #9fa8da;
+            cursor: not-allowed;
+        }
+        .btn:hover:not(:disabled) {
             background-color: #1a237e;
         }
         .logout-btn {
@@ -103,7 +107,7 @@
                 <label for="password">Password</label>
                 <input type="password" id="password" required>
             </div>
-            <button type="submit" class="btn">Login</button>
+            <button type="submit" class="btn" id="login-btn">Login</button>
             <p id="error-message" class="hidden"></p>
         </form>
     </div>
@@ -120,7 +124,6 @@
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <script>
@@ -134,10 +137,9 @@
           appId: "1:934675149024:web:23486a5f38f65f103ce085",
           measurementId: "G-6TS06NTDZQ"
         };
-
+        
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
         const db = firebase.firestore();
 
         // DOM Elements
@@ -146,50 +148,91 @@
         const loginForm = document.getElementById('login-form');
         const emailInput = document.getElementById('email');
         const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('login-btn');
         const errorMessage = document.getElementById('error-message');
         const welcomeMessage = document.getElementById('welcome-message');
         const shareLocationBtn = document.getElementById('share-location-btn');
         const statusMessage = document.getElementById('status-message');
         const logoutBtn = document.getElementById('logout-btn');
 
-        // --- Authentication Logic ---
+        // --- Authentication Logic using Firestore ---
 
-        loginForm.addEventListener('submit', (e) => {
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = emailInput.value;
+            const email = emailInput.value.trim();
             const password = passwordInput.value;
+            
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Logging in...';
+            errorMessage.classList.add('hidden');
 
-            auth.signInWithEmailAndPassword(email, password)
-                .catch(error => {
-                    errorMessage.textContent = error.message;
-                    errorMessage.classList.remove('hidden');
-                });
+            try {
+                // Query Firestore for a user with the matching email
+                const usersRef = db.collection('users');
+                const snapshot = await usersRef.where('email', '==', email).limit(1).get();
+
+                if (snapshot.empty) {
+                    showError('No user found with that email.');
+                    return;
+                }
+
+                const userDoc = snapshot.docs[0];
+                const userData = userDoc.data();
+
+                // DANGEROUS: Comparing plain-text password.
+                // This is based on your data structure but is NOT recommended.
+                if (userData.password === password) {
+                    // Login successful
+                    // Use sessionStorage to keep the user logged in for the session
+                    sessionStorage.setItem('loggedInTeacherId', userDoc.id);
+                    sessionStorage.setItem('loggedInTeacherName', userData.fullName);
+                    showDashboard();
+                } else {
+                    // Incorrect password
+                    showError('Incorrect password. Please try again.');
+                }
+
+            } catch (error) {
+                console.error("Login Error:", error);
+                showError('An error occurred during login. Please try again.');
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Login';
+            }
         });
 
         logoutBtn.addEventListener('click', () => {
-            auth.signOut();
+            sessionStorage.removeItem('loggedInTeacherId');
+            sessionStorage.removeItem('loggedInTeacherName');
+            showLogin();
         });
 
-        auth.onAuthStateChanged(async user => {
-            if (user) {
-                // User is signed in
-                loginView.classList.add('hidden');
-                dashboardView.classList.remove('hidden');
-                
-                // Get user's full name from Firestore
-                const userDoc = await db.collection('users').doc(user.uid).get();
-                if (userDoc.exists) {
-                    welcomeMessage.textContent = `Welcome, ${userDoc.data().fullName}!`;
-                } else {
-                    welcomeMessage.textContent = 'Welcome!';
-                }
-                
+        function showDashboard() {
+            const teacherName = sessionStorage.getItem('loggedInTeacherName');
+            welcomeMessage.textContent = `Welcome, ${teacherName}!`;
+            loginView.classList.add('hidden');
+            dashboardView.classList.remove('hidden');
+        }
+
+        function showLogin() {
+            loginView.classList.remove('hidden');
+            dashboardView.classList.add('hidden');
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.remove('hidden');
+        }
+
+        // Check if user is already logged in on page load
+        function checkLoginStatus() {
+             console.warn("SECURITY WARNING: This app uses plain-text passwords stored in Firestore, which is highly insecure and should not be used in production.");
+            if (sessionStorage.getItem('loggedInTeacherId')) {
+                showDashboard();
             } else {
-                // User is signed out
-                loginView.classList.remove('hidden');
-                dashboardView.classList.add('hidden');
+                showLogin();
             }
-        });
+        }
 
         // --- Geolocation Logic ---
 
@@ -207,21 +250,24 @@
 
         async function handleSuccess(position) {
             const { latitude, longitude } = position.coords;
-            const user = auth.currentUser;
+            const teacherId = sessionStorage.getItem('loggedInTeacherId');
 
-            if (user) {
+            if (teacherId) {
                 try {
                     await db.collection('teacher_locations').add({
-                        teacherId: user.uid,
+                        teacherId: teacherId,
                         latitude: latitude,
                         longitude: longitude,
                         timestamp: firebase.firestore.FieldValue.serverTimestamp()
                     });
-                    showStatus(`Location shared successfully! Lat: ${latitude.toFixed(4)}, Lon: ${longitude.toFixed(4)}`);
+                    showStatus(`Location shared! Lat: ${latitude.toFixed(4)}, Lon: ${longitude.toFixed(4)}`);
                 } catch (error) {
                     console.error("Error writing location to Firestore: ", error);
                     showStatus('Error saving your location. Please try again.');
                 }
+            } else {
+                showStatus('Error: You are not logged in.');
+                showLogin(); // Force back to login if session is lost
             }
             resetShareButton();
         }
@@ -230,17 +276,13 @@
             let message = '';
             switch (error.code) {
                 case error.PERMISSION_DENIED:
-                    message = "You denied the request for Geolocation.";
-                    break;
+                    message = "You denied the request for Geolocation."; break;
                 case error.POSITION_UNAVAILABLE:
-                    message = "Location information is unavailable.";
-                    break;
+                    message = "Location information is unavailable."; break;
                 case error.TIMEOUT:
-                    message = "The request to get user location timed out.";
-                    break;
+                    message = "The request to get user location timed out."; break;
                 default:
-                    message = "An unknown error occurred.";
-                    break;
+                    message = "An unknown error occurred."; break;
             }
             showStatus(message);
             resetShareButton();
@@ -255,6 +297,9 @@
             shareLocationBtn.disabled = false;
             shareLocationBtn.textContent = 'Share My Location';
         }
+
+        // Run on page load
+        document.addEventListener('DOMContentLoaded', checkLoginStatus);
 
     </script>
 </body>
