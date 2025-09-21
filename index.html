@@ -3,172 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Attendance Panel</title>
+    <title>Teacher Portal</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: #f4f7f6;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
             margin: 0;
-            padding: 20px;
-            color: #333;
         }
         .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: #fff;
-            padding: 25px;
+            background: #ffffff;
+            padding: 40px;
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-        h1 {
-            color: #1a237e;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
             text-align: center;
-            border-bottom: 2px solid #e0e0e0;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
         }
-        .date-selector, .actions-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        h1, h2 {
+            color: #1a237e;
             margin-bottom: 25px;
-            padding: 15px;
-            background-color: #e8eaf6;
-            border-radius: 8px;
         }
-        .date-selector label {
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
             font-weight: 500;
-            margin-right: 10px;
+            color: #555;
         }
-        .date-selector input[type="date"] {
-            padding: 8px;
-            border-radius: 6px;
-            border: 1px solid #c5cae9;
-            font-family: 'Poppins', sans-serif;
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
         }
-        .action-btn {
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
             background-color: #3949ab;
             color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
-            font-weight: 500;
             transition: background-color 0.3s ease;
-            text-decoration: none;
         }
-        .action-btn:hover {
+        .btn:disabled {
+            background-color: #9fa8da;
+            cursor: not-allowed;
+        }
+        .btn:hover:not(:disabled) {
             background-color: #1a237e;
         }
-        .teacher-list {
-            list-style-type: none;
-            padding: 0;
+        .logout-btn {
+            background-color: #d32f2f;
+            margin-top: 20px;
         }
-        .teacher-card {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        .logout-btn:hover {
+            background-color: #b71c1c;
+        }
+        .hidden {
+            display: none;
+        }
+        #error-message {
+            margin-top: 15px; padding: 10px; border-radius: 5px;
+            color: #721c24; background-color: #f8d7da;
+        }
+        .status-box {
+            margin: 20px 0;
             padding: 15px;
-            border: 1px solid #e0e0e0;
             border-radius: 8px;
-            margin-bottom: 10px;
-            transition: box-shadow 0.2s ease-in-out, border-left 0.3s;
-            border-left: 5px solid #ccc; /* Default border */
+            background-color: #e8f5e9;
+            border: 1px solid #a5d6a7;
+            color: #2e7d32;
         }
-        .teacher-card.status-Present { border-left-color: #4caf50; }
-        .teacher-card.status-Absent { border-left-color: #f44336; }
-        .teacher-card.status-PL { border-left-color: #2196f3; }
-        
-        .teacher-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .teacher-name {
-            font-weight: 600;
-            font-size: 1.1em;
-        }
-        .teacher-status {
-            padding: 4px 12px;
-            border-radius: 15px;
-            color: white;
-            font-weight: 500;
-            font-size: 0.9em;
-        }
-        .status-Present { background-color: #4caf50; }
-        .status-Absent { background-color: #f44336; }
-        .status-PL { background-color: #2196f3; }
-        .status-NotMarked { background-color: #9e9e9e; }
-        
-        .attendance-actions button {
-            margin-left: 8px;
-            padding: 8px 15px;
-            border: 1px solid #ccc;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: 500;
-            background-color: #fff;
-            transition: transform 0.2s ease, background-color 0.3s, color 0.3s;
-        }
-        .attendance-actions button:hover {
-            transform: translateY(-2px);
-        }
-        .btn-present:hover { background-color: #4caf50; color: white; border-color: #4caf50;}
-        .btn-absent:hover { background-color: #f44336; color: white; border-color: #f44336;}
-        .btn-pl:hover { background-color: #2196f3; color: white; border-color: #2196f3;}
-        
-        .status-message {
-            text-align: center;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 10px;
-            visibility: hidden;
-            opacity: 0;
-            transition: all 0.5s ease;
-        }
-        .status-message.show { visibility: visible; opacity: 1; }
-        .status-message.success { background-color: #d4edda; color: #155724; }
-        .status-message.error { background-color: #f8d7da; color: #721c24; }
-        .status-message.info { background-color: #d1ecf1; color: #0c5460; }
+        .status-box p { margin: 0; }
+        .status-box .label { font-weight: 600; }
+        .status-box .coords { font-family: monospace; font-size: 0.9em; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>Admin Attendance Panel</h1>
-
-        <div class="date-selector">
-            <div>
-                <label for="attendance-date">Attendance Date:</label>
-                <input type="date" id="attendance-date" readonly>
+    <!-- Login View -->
+    <div id="login-view" class="container">
+        <h1>Teacher Login</h1>
+        <form id="login-form">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" required>
             </div>
-            <a href="./view_attendance.html" class="action-btn">View All Records</a>
-        </div>
-        
-        <div class="actions-bar">
-             <p>Auto-tracking runs on page load. Click to re-run.</p>
-             <button class="action-btn" onclick="autoTrackAttendance(true)">
-                &#128205; Re-run Auto Track
-            </button>
-        </div>
-
-        <div id="teacher-list-container">
-            <ul id="teacher-list" class="teacher-list">
-                <!-- Teacher cards will be dynamically inserted here -->
-            </ul>
-            <p id="loading-message">Initializing panel...</p>
-        </div>
-        
-        <div id="status-message" class="status-message"></div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required>
+            </div>
+            <button type="submit" class="btn" id="login-btn">Login</button>
+            <p id="error-message" class="hidden"></p>
+        </form>
     </div>
+
+    <!-- Dashboard View -->
+    <div id="dashboard-view" class="container hidden">
+        <h2 id="welcome-message">Welcome!</h2>
+        <div class="status-box">
+            <p><span class="label">Status:</span> <span id="tracking-status">Initializing...</span></p>
+            <p><span class="label">Last Sent:</span> <span id="last-coords" class="coords">N/A</span></p>
+        </div>
+        <p>Your location is being tracked automatically while this page is open.</p>
+        <button id="logout-btn" class="btn logout-btn">Logout</button>
+    </div>
+
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <script>
-        // Your web app's Firebase configuration
         const firebaseConfig = {
           apiKey: "AIzaSyD-ers6CRuH8bCFomXJHuLxPWff-Xa4ZVk",
           authDomain: "xperts-data.firebaseapp.com",
@@ -178,183 +136,159 @@
           appId: "1:934675149024:web:23486a5f38f65f103ce085",
           measurementId: "G-6TS06NTDZQ"
         };
-
-        // Initialize Firebase
+        
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
         // DOM Elements
-        const teacherListEl = document.getElementById('teacher-list');
-        const loadingMessageEl = document.getElementById('loading-message');
-        const attendanceDateEl = document.getElementById('attendance-date');
-        const statusMessageEl = document.getElementById('status-message');
-        
-        // --- Core Functions ---
-        
-        // Function to get today's date in YYYY-MM-DD format
-        function getTodayDateString() {
-            const today = new new Date();
-            const year = today.getFullYear();
-            const month = String(today.getMonth() + 1).padStart(2, '0');
-            const day = String(today.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        }
+        const loginView = document.getElementById('login-view');
+        const dashboardView = document.getElementById('dashboard-view');
+        const loginForm = document.getElementById('login-form');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('login-btn');
+        const errorMessage = document.getElementById('error-message');
+        const welcomeMessage = document.getElementById('welcome-message');
+        const trackingStatus = document.getElementById('tracking-status');
+        const lastCoords = document.getElementById('last-coords');
+        const logoutBtn = document.getElementById('logout-btn');
 
-        // Initialize the entire panel on page load
-        async function initializePanel() {
-            attendanceDateEl.value = getTodayDateString();
-            loadingMessageEl.textContent = 'Fetching teachers and attendance data...';
+        let locationInterval = null; // Variable to hold our interval timer
 
-            // 1. Fetch all teachers
-            const teachersSnapshot = await db.collection('users').where('role', '==', 'Teacher').get();
-            const allTeachers = new Map();
-            teachersSnapshot.forEach(doc => {
-                allTeachers.set(doc.id, doc.data());
-            });
+        // --- Authentication using Firestore ---
 
-            // 2. Fetch today's attendance record
-            const todayDate = getTodayDateString();
-            const attendanceDoc = await db.collection('attendance').doc(todayDate).get();
-            const attendanceData = attendanceDoc.exists ? attendanceDoc.data() : {};
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
             
-            loadingMessageEl.style.display = 'none';
-            teacherListEl.innerHTML = ''; // Clear list
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Logging in...';
+            errorMessage.classList.add('hidden');
 
-            // 3. Render the list with current statuses
-            allTeachers.forEach((teacher, teacherId) => {
-                const status = attendanceData[teacherId]?.status || 'NotMarked';
-                const card = document.createElement('li');
-                card.className = `teacher-card status-${status}`;
-                card.id = `teacher-card-${teacherId}`;
-                card.innerHTML = `
-                    <div class="teacher-info">
-                        <span id="status-badge-${teacherId}" class="teacher-status status-${status}">${status.replace('NotMarked', 'Not Marked')}</span>
-                        <span class="teacher-name">${teacher.fullName}</span>
-                    </div>
-                    <div class="attendance-actions">
-                        <button class="btn-present" onclick="markAttendance('${teacherId}', 'Present')">Present</button>
-                        <button class="btn-absent" onclick="markAttendance('${teacherId}', 'Absent')">Absent</button>
-                        <button class="btn-pl" onclick="markAttendance('${teacherId}', 'PL')">Paid Leave</button>
-                    </div>
-                `;
-                teacherListEl.appendChild(card);
-            });
-            
-            // 4. Run auto-tracking for unmarked teachers
-            await autoTrackAttendance(false); // `false` means don't show "Starting..." message
-        }
-
-        // Mark attendance for a specific teacher AND update UI
-        async function markAttendance(teacherId, status) {
-            const selectedDate = attendanceDateEl.value;
-            const attendanceRef = db.collection('attendance').doc(selectedDate);
             try {
-                await attendanceRef.set({
-                    [teacherId]: {
-                        status: status,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                    }
-                }, { merge: true });
-
-                // Update UI instantly
-                const cardEl = document.getElementById(`teacher-card-${teacherId}`);
-                const statusBadgeEl = document.getElementById(`status-badge-${teacherId}`);
-                if(cardEl && statusBadgeEl) {
-                    cardEl.className = `teacher-card status-${status}`;
-                    statusBadgeEl.className = `teacher-status status-${status}`;
-                    statusBadgeEl.textContent = status;
+                const snapshot = await db.collection('users').where('email', '==', email).limit(1).get();
+                if (snapshot.empty) {
+                    showError('No user found with that email.'); return;
                 }
-                
-                showStatus(`Marked ${status} for teacher ${teacherId.substring(0,6)}...`, 'success');
+                const userDoc = snapshot.docs[0];
+                const userData = userDoc.data();
+
+                if (userData.password === password) {
+                    // Login successful - Use localStorage for persistence
+                    localStorage.setItem('loggedInTeacherId', userDoc.id);
+                    localStorage.setItem('loggedInTeacherName', userData.fullName);
+                    showDashboard();
+                } else {
+                    showError('Incorrect password. Please try again.');
+                }
             } catch (error) {
-                console.error("Error marking attendance:", error);
-                showStatus('Failed to mark attendance. See console.', 'error');
+                console.error("Login Error:", error);
+                showError('An error occurred during login.');
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Login';
+            }
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            // Clear the interval when logging out
+            if (locationInterval) {
+                clearInterval(locationInterval);
+                locationInterval = null;
+            }
+            // Clear persistent login data
+            localStorage.removeItem('loggedInTeacherId');
+            localStorage.removeItem('loggedInTeacherName');
+            showLogin();
+        });
+
+        function showDashboard() {
+            const teacherName = localStorage.getItem('loggedInTeacherName');
+            welcomeMessage.textContent = `Welcome, ${teacherName}!`;
+            loginView.classList.add('hidden');
+            dashboardView.classList.remove('hidden');
+            startLocationTracking();
+        }
+
+        function showLogin() {
+            loginView.classList.remove('hidden');
+            dashboardView.classList.add('hidden');
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.remove('hidden');
+        }
+        
+        // --- Automatic Geolocation Tracking ---
+
+        function startLocationTracking() {
+            if (!navigator.geolocation) {
+                trackingStatus.textContent = "Geolocation is not supported.";
+                return;
+            }
+            
+            // Set an interval to run the tracking function every 5 seconds (5000 milliseconds)
+            // You can change this value. 2 seconds = 2000.
+            const UPDATE_INTERVAL = 5000;
+            
+            locationInterval = setInterval(updateLocation, UPDATE_INTERVAL);
+            
+            // Run it once immediately on login
+            updateLocation();
+        }
+
+        function updateLocation() {
+            trackingStatus.textContent = "Getting location...";
+            navigator.geolocation.getCurrentPosition(handleSuccess, handleError);
+        }
+
+        async function handleSuccess(position) {
+            const { latitude, longitude } = position.coords;
+            const teacherId = localStorage.getItem('loggedInTeacherId');
+
+            if (!teacherId) {
+                // If something goes wrong and we lose the ID, stop tracking.
+                clearInterval(locationInterval);
+                showLogin();
+                return;
+            }
+            
+            trackingStatus.textContent = "Active ✅";
+            lastCoords.textContent = `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
+
+            try {
+                // Use .doc(teacherId).set() to CREATE or OVERWRITE the document.
+                // This is much more efficient than .add().
+                const locationRef = db.collection('teacher_locations').doc(teacherId);
+                await locationRef.set({
+                    teacherId: teacherId,
+                    latitude: latitude,
+                    longitude: longitude,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            } catch (error) {
+                console.error("Error writing location to Firestore: ", error);
+                trackingStatus.textContent = "Error saving location!";
             }
         }
 
-        // Auto Track Feature
-        async function autoTrackAttendance(manualRun = false) {
-            if (manualRun) {
-                showStatus('Starting auto-tracking...', 'info');
-            }
-            
-            const TARGET_LAT = 24.5997154;
-            const TARGET_LON = 76.1666185;
-            const RADIUS_FEET = 5;
-            const RADIUS_METERS = RADIUS_FEET * 0.3048;
-            const todayDate = getTodayDateString();
-
-            // Get location data for today
-            const todayStart = new Date(todayDate);
-            todayStart.setHours(0, 0, 0, 0);
-            const tomorrowStart = new Date(todayStart);
-            tomorrowStart.setDate(tomorrowStart.getDate() + 1);
-
-            const locationsSnapshot = await db.collection('teacher_locations')
-                .where('timestamp', '>=', todayStart)
-                .where('timestamp', '<', tomorrowStart)
-                .get();
-
-            const locationsMap = new Map();
-            locationsSnapshot.forEach(doc => {
-                const data = doc.data();
-                locationsMap.set(data.teacherId, { lat: data.latitude, lon: data.longitude });
-            });
-            
-            let processedCount = 0;
-            const teacherCards = document.querySelectorAll('.teacher-card');
-            
-            for (const card of teacherCards) {
-                // Only process teachers who are currently 'NotMarked'
-                if (card.classList.contains('status-NotMarked')) {
-                    const teacherId = card.id.replace('teacher-card-', '');
-                    const teacherLocation = locationsMap.get(teacherId);
-
-                    let status = 'Absent'; // Default to Absent if no location is found
-                    if (teacherLocation) {
-                        const distance = calculateDistance(TARGET_LAT, TARGET_LON, teacherLocation.lat, teacherLocation.lon);
-                        if (distance <= RADIUS_METERS) {
-                            status = 'Present';
-                        }
-                    }
-                    await markAttendance(teacherId, status); // This will update Firestore and UI
-                    processedCount++;
-                }
-            }
-            
-            if (manualRun || processedCount > 0) {
-                showStatus(`Auto-tracking complete. Processed ${processedCount} unmarked teachers.`, 'success');
-            }
+        function handleError(error) {
+            trackingStatus.textContent = `Error: ${error.message}`;
+            console.error(`Geolocation Error (${error.code}): ${error.message}`);
         }
 
+        // --- Initial Load ---
 
-        // Haversine formula to calculate distance in meters
-        function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371e3; // metres
-            const φ1 = lat1 * Math.PI / 180;
-            const φ2 = lat2 * Math.PI / 180;
-            const Δφ = (lat2 - lat1) * Math.PI / 180;
-            const Δλ = (lon2 - lon1) * Math.PI / 180;
+        document.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('loggedInTeacherId')) {
+                showDashboard();
+            } else {
+                showLogin();
+            }
+        });
 
-            const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-                      Math.cos(φ1) * Math.cos(φ2) *
-                      Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-            return R * c;
-        }
-
-        // Utility to show feedback messages
-        function showStatus(message, type) {
-            statusMessageEl.textContent = message;
-            statusMessageEl.className = `status-message ${type} show`;
-            setTimeout(() => {
-                statusMessageEl.classList.remove('show');
-            }, 4000);
-        }
-
-        // Initial fetch when the page loads
-        document.addEventListener('DOMContentLoaded', initializePanel);
     </script>
 </body>
 </html>
