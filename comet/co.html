@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create your Comet Account</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+        :root { --background-color: #0c0c14; --text-color: #e0e0e0; --accent-color: #7e7eff; --subtle-color: #555; --error-color: #ff8a80; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--background-color); color: var(--text-color); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px 0; }
+        .signup-container { width: 100%; max-width: 480px; padding: 20px; }
+        .logo { font-size: 2rem; font-weight: 700; letter-spacing: 1px; color: #fff; text-align: center; }
+        .logo span { color: var(--accent-color); }
+        h1 { font-size: 1.5rem; font-weight: 500; margin-bottom: 30px; text-align: center; }
+        .step { display: none; }
+        .step.active { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        h2 { font-size: 1.2rem; font-weight: 500; margin-bottom: 25px; }
+        .input-group { margin-bottom: 25px; }
+        .input-field { width: 100%; padding: 10px 0; background: transparent; border: none; border-bottom: 1px solid var(--subtle-color); color: #fff; font-size: 1rem; transition: border-color 0.3s; box-sizing: border-box; }
+        .input-field:focus { outline: none; border-bottom-color: var(--accent-color); }
+        .input-field::placeholder { color: #888; }
+        .name-group, .dob-group { display: flex; gap: 20px; }
+        .id-suggestions { margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 10px; }
+        .id-suggestions button { background-color: transparent; border: 1px solid var(--subtle-color); color: #eee; padding: 6px 12px; border-radius: 16px; cursor: pointer; transition: all 0.2s; }
+        .id-suggestions button:hover { border-color: var(--accent-color); color: var(--accent-color); }
+        .custom-id-group { display: flex; align-items: baseline; }
+        .id-suffix { color: #888; margin-left: 8px; font-size: 1rem; }
+        .actions { display: flex; justify-content: flex-end; align-items: center; margin-top: 40px; }
+        .link-btn { background: none; border: none; color: var(--accent-color); font-weight: 500; cursor: pointer; font-size: 0.9rem; margin-right: auto; font-family: 'Inter', sans-serif; }
+        .primary-btn { background-color: var(--accent-color); color: #fff; border: none; padding: 12px 24px; border-radius: 6px; font-weight: 500; cursor: pointer; font-size: 1rem; transition: background-color 0.3s; font-family: 'Inter', sans-serif; }
+        .error-message { color: var(--error-color); font-size: 0.85rem; margin-top: 10px; display: none; }
+    </style>
+</head>
+<body>
+    <div class="signup-container">
+        <div class="logo">C<span>o</span>met</div>
+        <h1>Create your Account</h1>
+        <form id="signupForm" novalidate>
+            <div id="step1" class="step active">
+                <h2>Enter your name</h2>
+                <div class="name-group">
+                    <input type="text" id="firstName" class="input-field" placeholder="First name" required>
+                    <input type="text" id="lastName" class="input-field" placeholder="Last name" required>
+                </div>
+                <div class="actions">
+                    <a href="1.html" class="link-btn">Sign in instead</a>
+                    <button type="button" class="primary-btn" onclick="nextStep(1)">Next</button>
+                </div>
+            </div>
+            <div id="step2" class="step">
+                <h2>Basic information</h2>
+                <div class="dob-group">
+                    <input type="number" id="day" class="input-field" placeholder="Day">
+                    <select id="month" class="input-field">
+                        <option value="">Month</option><option value="1">Jan</option><option value="2">Feb</option><option value="3">Mar</option><option value="4">Apr</option><option value="5">May</option><option value="6">Jun</option><option value="7">Jul</option><option value="8">Aug</option><option value="9">Sep</option><option value="10">Oct</option><option value="11">Nov</option><option value="12">Dec</option>
+                    </select>
+                    <input type="number" id="year" class="input-field" placeholder="Year">
+                </div>
+                <div class="actions">
+                    <button type="button" class="link-btn" onclick="prevStep(2)">Back</button>
+                    <button type="button" class="primary-btn" onclick="nextStep(2)">Next</button>
+                </div>
+            </div>
+            <div id="step3" class="step">
+                <h2>Choose your Comet ID</h2>
+                <div id="idSuggestions" class="id-suggestions"></div>
+                <div class="input-group custom-id-group">
+                    <input type="text" id="customId" class="input-field" placeholder="Create your own" required>
+                    <span class="id-suffix">@comet.com</span>
+                </div>
+                <div class="actions">
+                    <button type="button" class="link-btn" onclick="prevStep(3)">Back</button>
+                    <button type="button" class="primary-btn" onclick="nextStep(3)">Next</button>
+                </div>
+            </div>
+            <div id="step4" class="step">
+                <h2>Create a password</h2>
+                <div class="name-group">
+                    <input type="password" id="password" class="input-field" placeholder="Password" required>
+                    <input type="password" id="confirmPassword" class="input-field" placeholder="Confirm" required>
+                </div>
+                <div id="final-error" class="error-message"></div>
+                <div class="actions">
+                    <button type="button" class="link-btn" onclick="prevStep(4)">Back</button>
+                    <button type="submit" class="primary-btn">Create Account</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBDHgR4VKaa-c5OcfGDhaLfVlDBkRRWd8k",
+            authDomain: "commet-accounts.firebaseapp.com",
+            projectId: "commet-accounts",
+            storageBucket: "commet-accounts.appspot.com",
+            messagingSenderId: "35074463743",
+            appId: "1:35074463743:web:e11289b56b6fa845e879ca"
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let currentStep = 1;
+        const steps = document.querySelectorAll('.step');
+
+        function showStep(stepNumber) {
+            steps.forEach(step => step.classList.remove('active'));
+            document.getElementById(`step${stepNumber}`).classList.add('active');
+        }
+        function nextStep(step) {
+            if (step === 1) { if (!document.getElementById('firstName').value || !document.getElementById('lastName').value) return; generateIdSuggestions(); }
+            if (step === 3 && !document.getElementById('customId').value) return;
+            currentStep++; showStep(currentStep);
+        }
+        function prevStep() { currentStep--; showStep(currentStep); }
+        function generateIdSuggestions() {
+            const first = document.getElementById('firstName').value.toLowerCase().replace(/[^a-z0-9]/g, ''), last = document.getElementById('lastName').value.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const container = document.getElementById('idSuggestions'); container.innerHTML = ''; if (!first || !last) return;
+            [`${first}${last}`, `${last}.${first}`, `${first}${last}${new Date().getFullYear().toString().substr(-2)}`].forEach(s => {
+                const btn = document.createElement('button'); btn.type = 'button'; btn.textContent = `${s}@comet.com`; btn.onclick = () => { document.getElementById('customId').value = s; }; container.appendChild(btn);
+            });
+        }
+        
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const finalError = document.getElementById('final-error');
+            finalError.style.display = 'none';
+
+            const password = document.getElementById('password').value;
+            if (password !== document.getElementById('confirmPassword').value) { finalError.textContent = "Passwords do not match."; finalError.style.display = 'block'; return; }
+            if (password.length < 6) { finalError.textContent = "Password must be at least 6 characters."; finalError.style.display = 'block'; return; }
+            
+            const userData = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                dob: `${document.getElementById('year').value}-${document.getElementById('month').value}-${document.getElementById('day').value}`,
+                cometId: document.getElementById('customId').value.trim() + '@comet.com',
+                password: password // Storing password in plain text
+            };
+
+            try {
+                // NEW: Check if Comet ID already exists in Firestore
+                const existingUserQuery = await db.collection('users').where('cometId', '==', userData.cometId).get();
+                if (!existingUserQuery.empty) {
+                    finalError.textContent = 'This Comet ID is already taken.';
+                    finalError.style.display = 'block';
+                    return;
+                }
+
+                // NEW: Add the new user document to Firestore
+                const docRef = await db.collection('users').add(userData);
+                
+                // NEW: Log the user in by saving their new document ID to localStorage
+                localStorage.setItem('cometUserDocId', docRef.id);
+                window.location.href = '3.html';
+
+            } catch (error) {
+                console.error("Signup Error:", error);
+                finalError.textContent = 'An error occurred. Please try again.';
+                finalError.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
