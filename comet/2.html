@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Comet Profile</title>
+    <title>Create your Comet Account</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
 
@@ -12,7 +12,7 @@
             --text-color: #e0e0e0;
             --accent-color: #7e7eff;
             --subtle-color: #555;
-            --destructive-color: #e57373;
+            --error-color: #ff8a80;
         }
 
         body {
@@ -22,56 +22,146 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
+            min-height: 100vh;
+            margin: 0; padding: 20px 0;
         }
 
-        .profile-container {
-            text-align: center;
+        .signup-container {
+            width: 100%;
+            max-width: 480px;
+            padding: 20px;
         }
 
-        .profile-avatar {
-            width: 100px; height: 100px; border-radius: 50%;
-            background-color: var(--accent-color);
-            color: var(--background-color);
-            display: flex; justify-content: center; align-items: center;
-            font-size: 3.5rem; font-weight: 700;
-            margin: 0 auto 25px auto;
+        .logo {
+            font-size: 2rem; font-weight: 700; letter-spacing: 1px; color: #fff; text-align: center;
+        }
+        .logo span { color: var(--accent-color); }
+
+        h1 {
+            font-size: 1.5rem; font-weight: 500; margin-bottom: 30px; text-align: center;
         }
 
-        .welcome-message {
-            font-size: 2rem; font-weight: 500; margin-bottom: 5px;
-        }
-
-        .comet-id {
-            font-size: 1.1rem; color: #aaa; margin-bottom: 40px;
-        }
-
-        .logout-btn {
-            background: none; border: 1px solid var(--destructive-color);
-            color: var(--destructive-color);
-            padding: 10px 24px; border-radius: 6px; font-weight: 500;
-            cursor: pointer; font-size: 1rem; text-decoration: none;
-            transition: all 0.3s;
-        }
-        .logout-btn:hover {
-            background-color: var(--destructive-color);
-            color: #fff;
-        }
+        .step { display: none; }
+        .step.active { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
-        #loader { font-size: 1.2rem; }
+        h2 { font-size: 1.2rem; font-weight: 500; margin-bottom: 25px; }
+
+        .input-group { margin-bottom: 25px; }
+        .input-field {
+            width: 100%; padding: 10px 0; background: transparent; border: none;
+            border-bottom: 1px solid var(--subtle-color); color: #fff; font-size: 1rem;
+            transition: border-color 0.3s; box-sizing: border-box;
+        }
+        .input-field:focus { outline: none; border-bottom-color: var(--accent-color); }
+        .input-field::placeholder { color: #888; }
+        select.input-field { appearance: none; }
+
+        .name-group, .dob-group { display: flex; gap: 20px; }
+        
+        .gender-group { display: flex; gap: 20px; margin-top: 10px; }
+        .gender-group label { cursor: pointer; display: flex; align-items: center; gap: 8px; }
+
+        .id-suggestions { margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 10px; }
+        .id-suggestions button {
+            background-color: transparent; border: 1px solid var(--subtle-color); color: #eee;
+            padding: 6px 12px; border-radius: 16px; cursor: pointer; transition: all 0.2s;
+        }
+        .id-suggestions button:hover { border-color: var(--accent-color); color: var(--accent-color); }
+
+        .custom-id-group { display: flex; align-items: baseline; }
+        .custom-id-group .input-field { flex-grow: 1; }
+        .id-suffix { color: #888; margin-left: 8px; font-size: 1rem; }
+        
+        .password-rules { font-size: 0.8rem; color: #aaa; margin-top: -15px; }
+
+        .actions {
+            display: flex; justify-content: flex-end; align-items: center; margin-top: 40px;
+        }
+        .link-btn {
+            background: none; border: none; color: var(--accent-color); font-weight: 500;
+            cursor: pointer; font-size: 0.9rem; margin-right: auto; font-family: 'Inter', sans-serif;
+        }
+        .primary-btn {
+            background-color: var(--accent-color); color: #fff; border: none; padding: 12px 24px;
+            border-radius: 6px; font-weight: 500; cursor: pointer; font-size: 1rem;
+            transition: background-color 0.3s; font-family: 'Inter', sans-serif;
+        }
+        .primary-btn:hover { background-color: #6a6aff; }
+
+        .error-message { color: var(--error-color); font-size: 0.85rem; margin-top: 10px; display: none; }
     </style>
 </head>
 <body>
 
-    <div class="profile-container">
-        <div id="loader">Loading your profile...</div>
-        <div id="profileContent" style="display: none;">
-            <div id="profileAvatar" class="profile-avatar"></div>
-            <h1 class="welcome-message" id="welcomeMessage"></h1>
-            <p class="comet-id" id="cometIdDisplay"></p>
-            <a href="4.html" class="logout-btn">Logout</a>
-        </div>
+    <div class="signup-container">
+        <div class="logo">C<span>o</span>met</div>
+        <h1>Create your Account</h1>
+        
+        <form id="signupForm" novalidate>
+            <!-- Step 1: Name -->
+            <div id="step1" class="step active">
+                <h2>Enter your name</h2>
+                <div class="name-group">
+                    <input type="text" id="firstName" class="input-field" placeholder="First name" required>
+                    <input type="text" id="lastName" class="input-field" placeholder="Last name" required>
+                </div>
+                <div class="actions">
+                    <a href="1.html" class="link-btn">Sign in instead</a>
+                    <button type="button" class="primary-btn" onclick="nextStep(1)">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Basic Info -->
+            <div id="step2" class="step">
+                <h2>Basic information</h2>
+                <div class="dob-group">
+                    <input type="number" id="day" class="input-field" placeholder="Day">
+                    <select id="month" class="input-field">
+                        <option value="">Month</option> <option value="1">January</option> <option value="2">February</option> <option value="3">March</option> <option value="4">April</option> <option value="5">May</option> <option value="6">June</option> <option value="7">July</option> <option value="8">August</option> <option value="9">September</option> <option value="10">October</option> <option value="11">November</option> <option value="12">December</option>
+                    </select>
+                    <input type="number" id="year" class="input-field" placeholder="Year">
+                </div>
+                <div class="input-group gender-group">
+                    <label><input type="radio" name="gender" value="male">Male</label>
+                    <label><input type="radio" name="gender" value="female">Female</label>
+                    <label><input type="radio" name="gender" value="other">Prefer not to say</label>
+                </div>
+                <div class="actions">
+                    <button type="button" class="link-btn" onclick="prevStep(2)">Back</button>
+                    <button type="button" class="primary-btn" onclick="nextStep(2)">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Choose ID -->
+            <div id="step3" class="step">
+                <h2>Choose your Comet ID</h2>
+                <div id="idSuggestions" class="id-suggestions"></div>
+                <div class="input-group custom-id-group">
+                    <input type="text" id="customId" class="input-field" placeholder="Create your own" required>
+                    <span class="id-suffix">@comet.com</span>
+                </div>
+                <div class="actions">
+                    <button type="button" class="link-btn" onclick="prevStep(3)">Back</button>
+                    <button type="button" class="primary-btn" onclick="nextStep(3)">Next</button>
+                </div>
+            </div>
+            
+            <!-- Step 4: Password -->
+            <div id="step4" class="step">
+                <h2>Create a strong password</h2>
+                <div class="name-group">
+                    <input type="password" id="password" class="input-field" placeholder="Password" required>
+                    <input type="password" id="confirmPassword" class="input-field" placeholder="Confirm" required>
+                </div>
+                <p class="password-rules">Use 8 or more characters with a mix of letters & numbers.</p>
+                <div id="final-error" class="error-message"></div>
+                <div class="actions">
+                    <button type="button" class="link-btn" onclick="prevStep(4)">Back</button>
+                    <button type="submit" class="primary-btn">Create Account</button>
+                </div>
+            </div>
+        </form>
     </div>
 
     <!-- Firebase SDKs -->
@@ -92,27 +182,86 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                try {
-                    const doc = await db.collection('users').doc(user.uid).get();
-                    if (doc.exists) {
-                        const userData = doc.data();
-                        document.getElementById('welcomeMessage').textContent = `Welcome, ${userData.firstName}`;
-                        document.getElementById('cometIdDisplay').textContent = userData.cometId;
-                        document.getElementById('profileAvatar').textContent = userData.firstName.charAt(0).toUpperCase();
-                        
-                        document.getElementById('loader').style.display = 'none';
-                        document.getElementById('profileContent').style.display = 'block';
-                    } else { throw new Error("User data not found."); }
-                } catch (error) {
-                    console.error("Error fetching user data:", error);
-                    document.getElementById('loader').textContent = 'Error loading profile.';
-                }
-            } else {
-                window.location.href = '1.html';
+        const steps = document.querySelectorAll('.step');
+        let currentStep = 1;
+
+        function showStep(stepNumber) {
+            steps.forEach(step => step.classList.remove('active'));
+            document.getElementById(`step${stepNumber}`).classList.add('active');
+        }
+
+        function nextStep(step) {
+            if (step === 1) {
+                if (!document.getElementById('firstName').value || !document.getElementById('lastName').value) return;
+                generateIdSuggestions();
+            }
+            if (step === 3 && !document.getElementById('customId').value) return;
+            currentStep++;
+            showStep(currentStep);
+        }
+
+        function prevStep(step) {
+            currentStep--;
+            showStep(currentStep);
+        }
+        
+        function generateIdSuggestions() {
+            const first = document.getElementById('firstName').value.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const last = document.getElementById('lastName').value.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const container = document.getElementById('idSuggestions');
+            container.innerHTML = '';
+            if (!first || !last) return;
+
+            const suggestions = [`${first}${last}`, `${last}.${first}`, `${first}${last}${new Date().getFullYear().toString().substr(-2)}`];
+            suggestions.forEach(s => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.textContent = `${s}@comet.com`;
+                btn.onclick = () => { document.getElementById('customId').value = s; };
+                container.appendChild(btn);
+            });
+        }
+        
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const finalError = document.getElementById('final-error');
+            finalError.style.display = 'none';
+
+            const formData = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                dob: `${document.getElementById('year').value}-${document.getElementById('month').value}-${document.getElementById('day').value}`,
+                gender: document.querySelector('input[name="gender"]:checked')?.value,
+                cometId: document.getElementById('customId').value.trim() + '@comet.com',
+                password: document.getElementById('password').value,
+                confirmPassword: document.getElementById('confirmPassword').value
+            };
+            
+            if (formData.password !== formData.confirmPassword) {
+                finalError.textContent = "Passwords do not match.";
+                finalError.style.display = 'block'; return;
+            }
+            if (formData.password.length < 8) {
+                finalError.textContent = "Password must be at least 8 characters long.";
+                finalError.style.display = 'block'; return;
+            }
+
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(formData.cometId, formData.password);
+                const user = userCredential.user;
+                await db.collection('users').doc(user.uid).set({
+                    firstName: formData.firstName,
+                    lastName: formData.lastName,
+                    dob: formData.dob,
+                    gender: formData.gender,
+                    cometId: formData.cometId
+                });
+                window.location.href = '3.html';
+            } catch (error) {
+                finalError.textContent = error.code === 'auth/email-already-in-use' ? 'This Comet ID is already taken.' : 'An error occurred.';
+                finalError.style.display = 'block';
             }
         });
     </script>
 </body>
-</html>
+</html>                       
