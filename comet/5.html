@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose an account</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+        :root { --background-color: #F8F9FC; --text-color: #1F2328; --subtle-text: #5C626A; --accent-color: #4A57F7; --accent-hover: #3A47E7; --border-color: #DDE1E6; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--background-color); margin: 0; text-align: center; }
+        .chooser-container { padding: 30px; }
+        .logo { font-size: 1.8rem; font-weight: 700; color: var(--text-color); }
+        .logo span { color: var(--accent-color); }
+        h1 { font-size: 1.5rem; margin-top: 20px; }
+        p { color: var(--subtle-text); }
+        
+        .loader, #login-prompt, #account-view { display: none; /* Hidden by default */ }
+        .loader.visible, #login-prompt.visible, #account-view.visible { display: block; }
+        
+        #loader { padding-top: 50px; color: var(--subtle-text); }
+        
+        .account-card {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-top: 30px;
+            text-align: left;
+            background-color: #fff;
+        }
+        .avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .user-info .name { font-weight: 700; color: var(--text-color); }
+        .user-info .email { color: var(--subtle-text); font-size: 0.9rem; }
+        
+        .primary-btn {
+            width: 100%;
+            background-color: var(--accent-color);
+            color: #fff;
+            border: none;
+            padding: 16px;
+            border-radius: 10px;
+            font-weight: 500;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 30px;
+        }
+        .primary-btn:hover { background-color: var(--accent-hover); }
+    </style>
+</head>
+<body>
+    <div class="chooser-container">
+        <div class="logo">C<span>o</span>met</div>
+        <h1 id="header-title">Choose an account</h1>
+        <p>to continue</p>
+
+        <!-- Loader -->
+        <div class="loader visible" id="loader">Loading...</div>
+
+        <!-- View for logged-in users -->
+        <div id="account-view">
+            <div class="account-card">
+                <div class="avatar" id="avatar"></div>
+                <div class="user-info">
+                    <div class="name" id="user-name"></div>
+                    <div class="email" id="user-email"></div>
+                </div>
+            </div>
+            <button class="primary-btn" id="continue-btn">Continue</button>
+        </div>
+
+        <!-- View for logged-out users -->
+        <div id="login-prompt">
+            <p>You are not signed in. Please sign in to your Comet account and try again.</p>
+            <button class="primary-btn" onclick="window.location.href='1.html'">Go to Sign In</button>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <script>
+        const firebaseConfig = { apiKey: "AIzaSyBDHgR4VKaa-c5OcfGDhaLfVlDBkRRWd8k", authDomain: "commet-accounts.firebaseapp.com", projectId: "commet-accounts", storageBucket: "commet-accounts.appspot.com", messagingSenderId: "35074463743", appId: "1:35074463743:web:e11289b56b6fa845e879ca" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // DOM Elements
+        const loader = document.getElementById('loader');
+        const accountView = document.getElementById('account-view');
+        const loginPrompt = document.getElementById('login-prompt');
+        const continueBtn = document.getElementById('continue-btn');
+
+        // 1. Get the target redirect URL from the popup's URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectToUrl = urlParams.get('redirect_to');
+
+        if (!redirectToUrl) {
+            loader.textContent = 'Error: Missing redirect URL.';
+        } else {
+            // 2. Check for a user session in localStorage
+            const userDocId = localStorage.getItem('cometUserDocId');
+
+            if (userDocId) {
+                // User is logged in, fetch their data
+                db.collection('users').doc(userDocId).get()
+                    .then(doc => {
+                        if (doc.exists) {
+                            const userData = doc.data();
+                            
+                            // Populate the UI with user data
+                            document.getElementById('avatar').textContent = userData.firstName.charAt(0).toUpperCase();
+                            document.getElementById('user-name').textContent = `${userData.firstName} ${userData.lastName}`;
+                            document.getElementById('user-email').textContent = userData.cometId;
+                            
+                            // Show the account view
+                            loader.classList.remove('visible');
+                            accountView.classList.add('visible');
+
+                        } else {
+                            // The stored ID is invalid, show login prompt
+                            showLoginPrompt();
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Error fetching user:", err);
+                        loader.textContent = 'Error fetching user data.';
+                    });
+            } else {
+                // User is not logged in, show the login prompt
+                showLoginPrompt();
+            }
+        }
+
+        function showLoginPrompt() {
+            loader.classList.remove('visible');
+            loginPrompt.classList.add('visible');
+        }
+
+        // 3. Add event listener to the continue button
+        continueBtn.addEventListener('click', () => {
+            if (redirectToUrl) {
+                // Redirect the popup window to the final destination
+                window.location.href = redirectToUrl;
+            }
+        });
+    </script>
+</body>
+</html>
