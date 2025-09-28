@@ -3,45 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Website That Receives Login (d2.html)</title>
+    <title>Secure Page (d2.html)</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; text-align: center; }
         .content { background: white; padding: 50px; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
         h1 { color: #333; }
         p { color: #666; }
-        .comet-button { display: inline-flex; align-items: center; gap: 12px; background-color: #4A57F7; color: white; border: none; padding: 14px 28px; font-size: 1rem; font-weight: 500; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(74, 87, 247, 0.2); }
-        .comet-button:hover { background-color: #3A47E7; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(74, 87, 247, 0.25); }
-        .comet-button .logo-char { font-weight: 700; font-size: 1.2rem; }
+        .error { color: #D73A49; font-weight: 500; }
+        .token { font-family: monospace; background-color: #eee; padding: 2px 6px; border-radius: 4px; }
     </style>
 </head>
 <body>
     <div class="content" id="main-content">
-        <h1>Welcome to My Website!</h1>
-        <p>Please sign in using your Comet Account below.</p>
-        <button class="comet-button" onclick="signInWithComet()">
-            <span class="logo-char">C</span>
-            <span>Sign in with Comet</span>
-        </button>
+        <h1>Loading Secure Content...</h1>
     </div>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
     <script>
-        function signInWithComet() {
-            const chooserUrl = `5.html?origin=${encodeURIComponent(window.location.origin)}`;
-            window.open(chooserUrl, 'CometAuthPopup', 'width=500,height=650');
-        }
+        const firebaseConfig = { apiKey: "AIzaSyBDHgR4VKaa-c5OcfGDhaLfVlDBkRRWd8k", authDomain: "commet-accounts.firebaseapp.com", projectId: "commet-accounts", storageBucket: "commet-accounts.appspot.com", messagingSenderId: "35074463743", appId: "1:35074463743:web:e11289b56b6fa845e879ca" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const mainContent = document.getElementById('main-content');
 
-        // This is the "Receiver" logic. It waits for the message from 5.html.
-        window.addEventListener('message', (event) => {
-            const data = event.data;
-            if (data && data.success === true && data.token) {
-                console.log("LOGIN CONFIRMATION RECEIVED!");
-                const mainContent = document.getElementById('main-content');
+        // This is the core "receiver" logic for this page.
+        async function verifyLogin() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token'); // Get the token from the URL
+
+            if (!token) {
                 mainContent.innerHTML = `
-                    <h1>Login Successful!</h1>
-                    <p>Welcome back, ${data.userInfo.firstName}. You are now logged in.</p>
+                    <h1>Access Denied</h1>
+                    <p class="error">No login token provided. Please sign in through the main page.</p>
                 `;
+                return;
             }
-        });
+
+            // "Verify" the token by fetching user data from Firestore
+            try {
+                const userDoc = await db.collection('users').doc(token).get();
+
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    mainContent.innerHTML = `
+                        <h1>Welcome, ${userData.firstName}!</h1>
+                        <p>You have successfully accessed the secure page.</p>
+                        <p>Your token is: <span class="token">${token}</span></p>
+                    `;
+                } else {
+                    mainContent.innerHTML = `
+                        <h1>Access Denied</h1>
+                        <p class="error">The provided login token is invalid.</p>
+                    `;
+                }
+            } catch (error) {
+                console.error("Verification error:", error);
+                mainContent.innerHTML = `<h1>Error</h1><p>Could not verify login status.</p>`;
+            }
+        }
+        
+        verifyLogin();
     </script>
 </body>
 </html>
