@@ -206,7 +206,7 @@
         }
         const auth = firebase.auth();
 
-        // DOM Elements
+        // --- DOM Elements ---
         const emailStep = document.getElementById('email-step');
         const passwordStep = document.getElementById('password-step');
         const cometIdInput = document.getElementById('cometId');
@@ -219,6 +219,10 @@
         const headerTitle = document.getElementById('header-title');
         const headerSubtitle = document.getElementById('header-subtitle');
 
+        // --- State Variable ---
+        let verifiedUserEmail = '';
+
+        // --- UI Functions ---
         function toggleCreateOptions() {
             const options = document.getElementById('createAccountOptions');
             options.style.display = options.style.display === 'block' ? 'none' : 'block';
@@ -232,7 +236,8 @@
             passwordInput.value = '';
             passwordError.style.display = 'none';
         }
-
+        
+        // --- Event Listeners ---
         nextBtn.addEventListener('click', async () => {
             const email = cometIdInput.value;
             if (!email) {
@@ -245,9 +250,10 @@
             try {
                 const methods = await auth.fetchSignInMethodsForEmail(email);
                 if (methods.length > 0) {
+                    verifiedUserEmail = email;
                     emailStep.classList.add('hidden');
                     passwordStep.classList.remove('hidden');
-                    userDisplay.innerHTML = `${email} &#9662;`; // Add a small dropdown arrow
+                    userDisplay.innerHTML = `${email} &#9662;`;
                     headerTitle.textContent = "Welcome";
                     headerSubtitle.style.display = 'none';
                     passwordInput.focus();
@@ -264,21 +270,27 @@
 
         authForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = cometIdInput.value;
+            const email = verifiedUserEmail;
             const password = passwordInput.value;
+            
             passwordError.style.display = 'none';
+            if (!password || !email) {
+                passwordError.textContent = "An error occurred. Please try again from the beginning.";
+                passwordError.style.display = 'block';
+                return;
+            }
 
             try {
                 await auth.signInWithEmailAndPassword(email, password);
-                window.location.href = 'https://abc.xyz'; // SUCCESS
+                window.location.href = 'index.html'; // Redirect to index to be routed to profile
             } catch (error) {
-                if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+                console.error("Sign-in error:", error);
+                if (error.code === 'auth/wrong-password') {
                     passwordError.textContent = "Wrong password. Try again or click Forgot password.";
-                    passwordError.style.display = 'block';
                 } else {
                     passwordError.textContent = "An unknown error occurred.";
-                    passwordError.style.display = 'block';
                 }
+                passwordError.style.display = 'block';
             }
         });
     </script>
