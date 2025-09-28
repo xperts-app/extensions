@@ -6,87 +6,40 @@
     <title>Choose an account</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
-        :root { --background-color: #F8F9FC; --text-color: #1F2328; --subtle-text: #5C626A; --accent-color: #4A57F7; --accent-hover: #3A47E7; --border-color: #DDE1E6; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--background-color); margin: 0; text-align: center; }
+        :root { --background-color: #F8F9FC; --text-color: #1F2328; --subtle-text: #5C626A; --accent-color: #4A57F7; --border-color: #DDE1E6; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--background-color); margin: 0; }
         .chooser-container { padding: 30px; }
+        .header { text-align: center; }
         .logo { font-size: 1.8rem; font-weight: 700; color: var(--text-color); }
         .logo span { color: var(--accent-color); }
         h1 { font-size: 1.5rem; margin-top: 20px; }
         p { color: var(--subtle-text); }
-        
-        .loader, #login-prompt, #account-view { display: none; /* Hidden by default */ }
-        .loader.visible, #login-prompt.visible, #account-view.visible { display: block; }
-        
-        #loader { padding-top: 50px; color: var(--subtle-text); }
-        
-        .account-card {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 15px;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            margin-top: 30px;
-            text-align: left;
-            background-color: #fff;
-        }
-        .avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background-color: var(--accent-color);
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.8rem;
-            font-weight: 700;
-            flex-shrink: 0;
-        }
-        .user-info .name { font-weight: 700; color: var(--text-color); }
+        .loader { text-align: center; padding-top: 50px; color: var(--subtle-text); }
+
+        /* Styles for the account list */
+        .account-list { margin-top: 20px; border-top: 1px solid var(--border-color); }
+        .account-card, .add-account-btn { display: flex; align-items: center; gap: 15px; padding: 15px; border-bottom: 1px solid var(--border-color); text-align: left; cursor: pointer; transition: background-color 0.2s; }
+        .account-card:hover, .add-account-btn:hover { background-color: #fff; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; background-color: var(--accent-color); color: white; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; font-weight: 700; flex-shrink: 0; }
+        .user-info .name { font-weight: 500; color: var(--text-color); }
         .user-info .email { color: var(--subtle-text); font-size: 0.9rem; }
         
-        .primary-btn {
-            width: 100%;
-            background-color: var(--accent-color);
-            color: #fff;
-            border: none;
-            padding: 16px;
-            border-radius: 10px;
-            font-weight: 500;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            margin-top: 30px;
-        }
-        .primary-btn:hover { background-color: var(--accent-hover); }
+        .add-account-icon { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border-color); display: flex; justify-content: center; align-items: center; font-size: 1.5rem; color: var(--subtle-text); }
+        .add-account-text { font-weight: 500; color: var(--text-color); }
     </style>
 </head>
 <body>
     <div class="chooser-container">
-        <div class="logo">C<span>o</span>met</div>
-        <h1 id="header-title">Choose an account</h1>
-        <p>to continue</p>
-
-        <!-- Loader -->
-        <div class="loader visible" id="loader">Loading...</div>
-
-        <!-- View for logged-in users -->
-        <div id="account-view">
-            <div class="account-card">
-                <div class="avatar" id="avatar"></div>
-                <div class="user-info">
-                    <div class="name" id="user-name"></div>
-                    <div class="email" id="user-email"></div>
-                </div>
-            </div>
-            <button class="primary-btn" id="continue-btn">Continue</button>
+        <div class="header">
+            <div class="logo">C<span>o</span>met</div>
+            <h1>Choose an account</h1>
+            <p>to continue</p>
         </div>
 
-        <!-- View for logged-out users -->
-        <div id="login-prompt">
-            <p>You are not signed in. Please sign in to your Comet account and try again.</p>
-            <button class="primary-btn" onclick="window.location.href='1.html'">Go to Sign In</button>
+        <div class="loader" id="loader">Loading accounts...</div>
+        
+        <div class="account-list" id="account-list">
+            <!-- Account cards will be dynamically inserted here -->
         </div>
     </div>
 
@@ -99,65 +52,83 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // DOM Elements
         const loader = document.getElementById('loader');
-        const accountView = document.getElementById('account-view');
-        const loginPrompt = document.getElementById('login-prompt');
-        const continueBtn = document.getElementById('continue-btn');
-
-        // 1. Get the target redirect URL from the popup's URL parameters
+        const accountList = document.getElementById('account-list');
         const urlParams = new URLSearchParams(window.location.search);
         const redirectToUrl = urlParams.get('redirect_to');
 
-        if (!redirectToUrl) {
-            loader.textContent = 'Error: Missing redirect URL.';
-        } else {
-            // 2. Check for a user session in localStorage
-            const userDocId = localStorage.getItem('cometUserDocId');
-
-            if (userDocId) {
-                // User is logged in, fetch their data
-                db.collection('users').doc(userDocId).get()
-                    .then(doc => {
-                        if (doc.exists) {
-                            const userData = doc.data();
-                            
-                            // Populate the UI with user data
-                            document.getElementById('avatar').textContent = userData.firstName.charAt(0).toUpperCase();
-                            document.getElementById('user-name').textContent = `${userData.firstName} ${userData.lastName}`;
-                            document.getElementById('user-email').textContent = userData.cometId;
-                            
-                            // Show the account view
-                            loader.classList.remove('visible');
-                            accountView.classList.add('visible');
-
-                        } else {
-                            // The stored ID is invalid, show login prompt
-                            showLoginPrompt();
-                        }
-                    })
-                    .catch(err => {
-                        console.error("Error fetching user:", err);
-                        loader.textContent = 'Error fetching user data.';
-                    });
-            } else {
-                // User is not logged in, show the login prompt
-                showLoginPrompt();
-            }
+        // Function to create an account card element
+        function createAccountCard(userData) {
+            const card = document.createElement('div');
+            card.className = 'account-card';
+            card.innerHTML = `
+                <div class="avatar">${userData.firstName.charAt(0).toUpperCase()}</div>
+                <div class="user-info">
+                    <div class="name">${userData.firstName} ${userData.lastName}</div>
+                    <div class="email">${userData.cometId}</div>
+                </div>
+            `;
+            card.addEventListener('click', () => {
+                // When an account is chosen, redirect to the target URL
+                if (redirectToUrl) {
+                    window.location.href = redirectToUrl;
+                }
+            });
+            return card;
         }
 
-        function showLoginPrompt() {
-            loader.classList.remove('visible');
-            loginPrompt.classList.add('visible');
+        // Function to create the "Add another account" button
+        function createAddAccountButton() {
+            const button = document.createElement('div');
+            button.className = 'add-account-btn';
+            button.innerHTML = `
+                <div class="add-account-icon">+</div>
+                <div class="add-account-text">Add another account</div>
+            `;
+            button.addEventListener('click', () => {
+                // Redirect to the new 'add account' page
+                window.location.href = `6.html?redirect_to=${encodeURIComponent(redirectToUrl)}`;
+            });
+            return button;
         }
 
-        // 3. Add event listener to the continue button
-        continueBtn.addEventListener('click', () => {
-            if (redirectToUrl) {
-                // Redirect the popup window to the final destination
-                window.location.href = redirectToUrl;
+        // Main logic
+        async function loadAccounts() {
+            if (!redirectToUrl) {
+                loader.textContent = 'Error: Missing redirect URL.';
+                return;
             }
-        });
+
+            const loggedInUsers = JSON.parse(localStorage.getItem('cometLoggedInUsers') || '[]');
+            
+            if (loggedInUsers.length === 0) {
+                // No one is logged in, show a prompt to go to the main login page
+                accountList.innerHTML = `<p style="text-align:center; padding: 20px;">No accounts are signed in.</p>`;
+                accountList.appendChild(createAddAccountButton());
+                loader.style.display = 'none';
+                return;
+            }
+
+            // Fetch data for all logged-in users
+            const userPromises = loggedInUsers.map(id => db.collection('users').doc(id).get());
+            const userDocs = await Promise.all(userPromises);
+
+            // Clear the list and loader
+            accountList.innerHTML = '';
+            loader.style.display = 'none';
+
+            // Populate the list with account cards
+            userDocs.forEach(doc => {
+                if (doc.exists) {
+                    accountList.appendChild(createAccountCard(doc.data()));
+                }
+            });
+
+            // Always add the "Add another account" button at the end
+            accountList.appendChild(createAddAccountButton());
+        }
+
+        loadAccounts();
     </script>
 </body>
 </html>
