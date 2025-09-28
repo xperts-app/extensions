@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Website - Using Comet Login</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        .content {
+            background: white;
+            padding: 50px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        p { color: #666; }
+        .comet-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background-color: #4A57F7;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(74, 87, 247, 0.2);
+        }
+        .comet-button:hover {
+            background-color: #3A47E7;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(74, 87, 247, 0.25);
+        }
+        .comet-button .logo-char {
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <h1>Welcome to Our Awesome Website!</h1>
+        <p>Sign in quickly and securely using your Comet Account.</p>
+        <button class="comet-button" onclick="signInWithComet()">
+            <span class="logo-char">C</span>
+            <span>Sign in with Comet</span>
+        </button>
+    </div>
+
+    <script>
+        function signInWithComet() {
+            // This is the URL our website wants the user to be sent to AFTER successful login.
+            const targetRedirectUrl = 'https://abc.xyz';
+
+            // We construct the URL for our account chooser, passing the target URL as a parameter.
+            // encodeURIComponent is important to make sure the URL is correctly formatted.
+            const chooserUrl = `5.html?redirect_to=${encodeURIComponent(targetRedirectUrl)}`;
+            
+            // Define the properties of the popup window.
+            const popupFeatures = 'width=500,height=650,menubar=no,toolbar=no,location=no,status=no';
+
+            // Open the chooser in a new popup window.
+            window.open(chooserUrl, 'CometAuthPopup', popupFeatures);
+        }
+    </script>
+</body>
+</html>
