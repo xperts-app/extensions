@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comet Accounts</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0c0c14; /* Consistent dark theme */
+            color: #e0e0e0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        .loading-message { 
+            font-size: 1.2rem; 
+            font-weight: 500;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="loading-message">Initializing Comet...</div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBDHgR4VKaa-c5OcfGDhaLfVlDBkRRWd8k",
+            authDomain: "commet-accounts.firebaseapp.com",
+            projectId: "commet-accounts",
+            storageBucket: "commet-accounts.appspot.com",
+            messagingSenderId: "35074463743",
+            appId: "1:35074463743:web:e11289b56b6fa845e879ca",
+            measurementId: "G-F1N8TQLMT5"
+        };
+        
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+
+        /**
+         * This is the authentication gatekeeper. It runs as soon as the page loads
+         * and checks the user's current login state.
+         */
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                // User is signed in.
+                console.log("User is signed in, redirecting to profile...");
+                // Use window.location.replace to prevent the user from clicking "back"
+                // and getting stuck in a redirect loop.
+                window.location.replace('3.html'); 
+            } else {
+                // No user is signed in.
+                console.log("No user signed in, redirecting to login page...");
+                window.location.replace('1.html');
+            }
+        });
+    </script>
+</body>
+</html>
