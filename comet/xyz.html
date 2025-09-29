@@ -3,86 +3,312 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Choose an account</title>
+    <title>Sign in - Comet Accounts</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
-        :root { --background-color: #F8F9FC; --text-color: #1F2328; --subtle-text: #5C626A; --accent-color: #4A57F7; --border-color: #DDE1E6; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--background-color); margin: 0; }
-        .chooser-container { padding: 30px; }
-        .header { text-align: center; }
-        .logo { font-size: 1.8rem; font-weight: 700; color: var(--text-color); }
-        .logo span { color: var(--accent-color); }
-        h1 { font-size: 1.5rem; margin-top: 20px; }
-        p { color: var(--subtle-text); }
-        .loader { text-align: center; padding-top: 50px; color: var(--subtle-text); }
-        .account-list { margin-top: 20px; border-top: 1px solid var(--border-color); }
-        .account-card { display: flex; align-items: center; gap: 15px; padding: 15px; border-bottom: 1px solid var(--border-color); text-align: left; cursor: pointer; transition: background-color 0.2s; }
-        .account-card:hover { background-color: #fff; }
-        .avatar { width: 40px; height: 40px; border-radius: 50%; background-color: var(--accent-color); color: white; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; font-weight: 700; flex-shrink: 0; }
-        .user-info .name { font-weight: 500; color: var(--text-color); }
-        .user-info .email { color: var(--subtle-text); font-size: 0.9rem; }
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        :root {
+            --primary-color: #4285F4;
+            --background-color: #f9f9f9;
+            --container-bg-color: #ffffff;
+            --text-color: #202124;
+            --secondary-text-color: #5f6368;
+            --border-color: #dadce0;
+            --error-color: #d93025;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: var(--text-color);
+        }
+
+        .auth-container {
+            background-color: var(--container-bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 48px 40px;
+            width: 100%;
+            max-width: 360px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .logo span {
+            color: var(--primary-color);
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 400;
+            margin-top: 16px;
+        }
+
+        p {
+            font-size: 16px;
+            color: var(--secondary-text-color);
+            margin-bottom: 24px;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 13px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border: 2px solid var(--primary-color);
+            padding: 12px 14px;
+        }
+
+        .error-message {
+            color: var(--error-color);
+            font-size: 12px;
+            text-align: left;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 32px;
+        }
+
+        .create-account-btn, .next-btn {
+            background-color: transparent;
+            border: none;
+            color: var(--primary-color);
+            font-weight: 500;
+            padding: 8px 0;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 4px;
+        }
+         .create-account-btn:hover, .next-btn:hover{
+            background-color: rgba(66, 133, 244, 0.05);
+         }
+
+        .next-btn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 8px 24px;
+        }
+        
+        .next-btn:hover {
+            background-color: #3b78e7;
+            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15)
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .user-display {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .create-account-menu {
+            position: relative;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            bottom: 110%;
+            left: 0;
+            background-color: white;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 4px;
+            overflow: hidden;
+            text-align: left;
+        }
+
+        .dropdown-content a {
+            color: var(--text-color);
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            font-size: 14px;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .create-account-menu:hover .dropdown-content {
+            display: block;
+        }
+
     </style>
 </head>
 <body>
-    <div class="chooser-container">
-        <div class="header">
-            <div class="logo">C<span>o</span>met</div>
-            <h1>Choose an account</h1>
-            <p>to continue</p>
+
+    <div class="auth-container">
+        <div class="logo">Comet<span>.</span></div>
+        <h1 id="header-text">Sign in</h1>
+        <p id="sub-header-text">to continue with Comet</p>
+
+        <div id="password-view" class="hidden">
+             <div id="user-display" class="user-display"></div>
         </div>
-        <div class="loader" id="loader">Loading accounts...</div>
-        <div class="account-list" id="account-list"></div>
+
+        <form id="login-form">
+            <div id="comet-id-view">
+                <div class="input-group">
+                    <input type="email" id="comet-id" class="input-field" placeholder="Comet ID" required>
+                    <div class="error-message" id="comet-id-error">Couldn't find your Comet Account</div>
+                </div>
+            </div>
+
+            <div id="password-input-view" class="hidden">
+                <div class="input-group">
+                    <input type="password" id="password" class="input-field" placeholder="Enter your password" required>
+                    <div class="error-message" id="password-error">Wrong password. Try again.</div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <div class="create-account-menu">
+                    <button type="button" class="create-account-btn">Create account</button>
+                    <div class="dropdown-content">
+                        <a href="2.html">For myself</a>
+                        <a href="#">For my business</a>
+                    </div>
+                </div>
+                <button type="button" id="next-btn" class="next-btn">Next</button>
+                <button type="button" id="signin-btn" class="next-btn hidden">Sign In</button>
+            </div>
+        </form>
     </div>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
     <script>
-        const firebaseConfig = { apiKey: "AIzaSyBDHgR4VKaa-c5OcfGDhaLfVlDBkRRWd8k", authDomain: "commet-accounts.firebaseapp.com", projectId: "commet-accounts", storageBucket: "commet-accounts.appspot.com", messagingSenderId: "35074463743", appId: "1:35074463743:web:e11289b56b6fa845e879ca" };
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const loader = document.getElementById('loader');
-        const accountList = document.getElementById('account-list');
-        const urlParams = new URLSearchParams(window.location.search);
-        
-        // Get the final destination URL from the parameter d1.html sent.
-        const redirectToUrl = urlParams.get('redirect_to');
-        
-        function createAccountCard(userData, docId) {
-            const card = document.createElement('div');
-            card.className = 'account-card';
-            card.innerHTML = `<div class="avatar">${userData.firstName.charAt(0).toUpperCase()}</div><div class="user-info"><div class="name">${userData.firstName} ${userData.lastName}</div><div class="email">${userData.cometId}</div></div>`;
-            
-            // This is the core "sender" logic.
-            card.addEventListener('click', () => {
-                // Construct the final URL with the user's token attached.
-                const finalUrl = `${redirectToUrl}?token=${docId}`;
+        const firebaseConfig = {
+            apiKey: "AIzaSyBDHgR4VKaa-c5OcfGDhaLfVlDBkRRWd8k",
+            authDomain: "commet-accounts.firebaseapp.com",
+            projectId: "commet-accounts",
+            storageBucket: "commet-accounts.firebasestorage.app",
+            messagingSenderId: "35074463743",
+            appId: "1:35074463743:web:e11289b56b6fa845e879ca",
+            measurementId: "G-F1N8TQLMT5"
+        };
 
-                // Redirect the main window (the one that opened this popup) to the final URL.
-                if (window.opener) { 
-                    window.opener.location.href = finalUrl; 
-                }
-
-                // Close the popup.
-                window.close();
-            });
-            return card;
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
         }
+        const db = firebase.firestore();
+
+        const cometIdInput = document.getElementById('comet-id');
+        const passwordInput = document.getElementById('password');
+        const nextBtn = document.getElementById('next-btn');
+        const signinBtn = document.getElementById('signin-btn');
+        const cometIdError = document.getElementById('comet-id-error');
+        const passwordError = document.getElementById('password-error');
+        const cometIdView = document.getElementById('comet-id-view');
+        const passwordView = document.getElementById('password-view');
+        const passwordInputView = document.getElementById('password-input-view');
+        const userDisplay = document.getElementById('user-display');
         
-        async function loadAccounts() {
-            const loggedInUsers = JSON.parse(localStorage.getItem('cometLoggedInUsers') || '[]');
-            if (loggedInUsers.length === 0) {
-                loader.innerHTML = `You are not signed into Comet. Please sign in and try again.`;
+        let storedUserData = null;
+
+        nextBtn.addEventListener('click', async () => {
+            const cometId = cometIdInput.value.trim().toLowerCase();
+            if (!cometId) {
+                cometIdError.textContent = 'Please enter a Comet ID';
+                cometIdError.style.display = 'block';
                 return;
             }
-            const userPromises = loggedInUsers.map(id => db.collection('users').doc(id).get());
-            const userDocs = await Promise.all(userPromises);
-            loader.style.display = 'none';
-            userDocs.forEach(doc => {
-                if (doc.exists) { 
-                    accountList.appendChild(createAccountCard(doc.data(), doc.id)); 
+            cometIdError.style.display = 'none';
+
+            try {
+                const userDocRef = db.collection('users').doc(cometId);
+                const docSnap = await userDocRef.get();
+
+                if (docSnap.exists) { // <-- FIX WAS APPLIED HERE
+                    storedUserData = docSnap.data();
+                    // Switch to password view
+                    cometIdView.classList.add('hidden');
+                    nextBtn.classList.add('hidden');
+                    
+                    userDisplay.textContent = cometId;
+                    passwordView.classList.remove('hidden');
+                    passwordInputView.classList.remove('hidden');
+                    signinBtn.classList.remove('hidden');
+                    passwordInput.focus();
+                } else {
+                    cometIdError.textContent = "Couldn't find your Comet Account";
+                    cometIdError.style.display = 'block';
                 }
-            });
-        }
-        loadAccounts();
+            } catch (error) {
+                console.error("Error checking user:", error);
+                cometIdError.textContent = "Error connecting to the server.";
+                cometIdError.style.display = 'block';
+            }
+        });
+
+        signinBtn.addEventListener('click', () => {
+            const password = passwordInput.value;
+            if (!password) {
+                 passwordError.textContent = 'Please enter your password';
+                 passwordError.style.display = 'block';
+                 return;
+            }
+            
+            if (storedUserData && password === storedUserData.password) {
+                passwordError.style.display = 'none';
+                localStorage.setItem('cometId', storedUserData.cometId);
+                window.location.href = 'https://xperts-app.github.io/extensions/comet/home';
+            } else {
+                passwordError.style.display = 'block';
+            }
+        });
+
+        cometIdInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                nextBtn.click();
+            }
+        });
+        passwordInput.addEventListener('keypress', (e) => {
+             if (e.key === 'Enter') {
+                e.preventDefault();
+                signinBtn.click();
+            }
+        });
     </script>
 </body>
 </html>
