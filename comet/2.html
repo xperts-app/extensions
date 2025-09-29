@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create your Comet Account</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        :root {
+            --primary-color: #4285F4;
+            --background-color: #f9f9f9;
+            --container-bg-color: #ffffff;
+            --text-color: #202124;
+            --secondary-text-color: #5f6368;
+            --border-color: #dadce0;
+            --error-color: #d93025;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px 0;
+            color: var(--text-color);
+        }
+
+        .auth-container {
+            background-color: var(--container-bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 48px 40px;
+            width: 100%;
+            max-width: 450px;
+            box-sizing: border-box;
+        }
+
+        .logo {
+            font-size: 24px; font-weight: 700; letter-spacing: -0.5px; text-align: center;
+        }
+        .logo span { color: var(--primary-color); }
+        h1 { font-size: 24px; font-weight: 400; margin-top: 16px; text-align: center; }
+        p { font-size: 16px; color: var(--secondary-text-color); margin-bottom: 24px; text-align: center;}
+
+        .form-row { display: flex; gap: 16px; }
+        .input-group { position: relative; margin-bottom: 20px; width: 100%; }
+        
+        .input-label { font-size: 14px; color: var(--secondary-text-color); margin-bottom: 8px; display: block; }
+        .input-field { width: 100%; padding: 13px 15px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 16px; box-sizing: border-box; }
+        .input-field:focus { outline: none; border: 2px solid var(--primary-color); padding: 12px 14px; }
+        
+        .error-message { color: var(--error-color); font-size: 12px; margin-top: 4px; display: none; }
+        
+        .gender-group { margin-bottom: 20px; }
+        .gender-group .input-label { margin-bottom: 12px; }
+        .gender-options { display: flex; gap: 20px; }
+        .gender-options label { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+
+        .username-suggestions { font-size: 12px; color: var(--secondary-text-color); margin-top: 8px; }
+        .suggestion { cursor: pointer; background: #f1f1f1; padding: 4px 8px; border-radius: 12px; margin-right: 5px; display: inline-block; }
+        .suggestion:hover { background: #e0e0e0; }
+        
+        .password-rules { font-size: 12px; color: var(--secondary-text-color); margin-top: 8px; }
+
+        .actions { display: flex; justify-content: flex-end; align-items: center; margin-top: 32px; gap: 20px;}
+        .signin-link { color: var(--primary-color); text-decoration: none; font-weight: 500; font-size: 14px; }
+        .next-btn { background-color: var(--primary-color); color: white; border: none; padding: 8px 24px; font-size: 14px; border-radius: 4px; cursor: pointer; }
+        .next-btn:hover { background-color: #3b78e7; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15) }
+
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="logo">Comet<span>.</span></div>
+        <h1>Create your Comet Account</h1>
+        <p>Enter your details below</p>
+
+        <form id="signup-form" novalidate>
+            <div class="form-row">
+                <div class="input-group">
+                    <label for="first-name" class="input-label">First name</label>
+                    <input type="text" id="first-name" class="input-field" required>
+                </div>
+                <div class="input-group">
+                    <label for="last-name" class="input-label">Last name</label>
+                    <input type="text" id="last-name" class="input-field" required>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="dob" class="input-label">Date of birth</label>
+                <input type="date" id="dob" class="input-field" required>
+            </div>
+            
+            <div class="gender-group">
+                <div class="input-label">Gender</div>
+                <div class="gender-options">
+                    <label><input type="radio" name="gender" value="male" required> Male</label>
+                    <label><input type="radio" name="gender" value="female"> Female</label>
+                    <label><input type="radio" name="gender" value="prefer_not_to_say"> Prefer not to say</label>
+                </div>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 24px 0;">
+
+            <div class="input-group">
+                <label for="username" class="input-label">Create a Comet ID</label>
+                <input type="text" id="username" class="input-field" required pattern="[a-z0-9.]+">
+                <div class="username-suggestions" id="username-suggestions"></div>
+                <div class="error-message" id="username-error"></div>
+            </div>
+
+            <div class="form-row">
+                <div class="input-group">
+                    <label for="password" class="input-label">Password</label>
+                    <input type="password" id="password" class="input-field" required>
+                </div>
+                <div class="input-group">
+                    <label for="confirm-password" class="input-label">Confirm</label>
+                    <input type="password" id="confirm-password" class="input-field" required>
+                </div>
+            </div>
+            <div class="error-message" id="password-error"></div>
+            <p class="password-rules">Use 8 or more characters with a mix of letters, numbers & symbols.</p>
+
+            <div class="actions">
+                 <a href="1.html" class="signin-link">Sign in instead</a>
+                <button type="submit" class="next-btn">Create Account</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBDHgR4VKaa-c5OcfGDhaLfVlDBkRRWd8k",
+            authDomain: "commet-accounts.firebaseapp.com",
+            projectId: "commet-accounts",
+            storageBucket: "commet-accounts.firebasestorage.app",
+            messagingSenderId: "35074463743",
+            appId: "1:35074463743:web:e11289b56b6fa845e879ca",
+            measurementId: "G-F1N8TQLMT5"
+        };
+        
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
+
+        const form = document.getElementById('signup-form');
+        const firstNameInput = document.getElementById('first-name');
+        const lastNameInput = document.getElementById('last-name');
+        const usernameInput = document.getElementById('username');
+        const suggestionsContainer = document.getElementById('username-suggestions');
+        const usernameError = document.getElementById('username-error');
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirm-password');
+        const passwordError = document.getElementById('password-error');
+
+        function generateUsernames() {
+            const fn = firstNameInput.value.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const ln = lastNameInput.value.toLowerCase().replace(/[^a-z0-9]/g, '');
+            if (!fn || !ln) return;
+
+            suggestionsContainer.innerHTML = 'Suggestions: ';
+            const suggestions = [
+                `${fn}.${ln}`,
+                `${ln}${fn}`,
+                `${fn}${ln}${Math.floor(Math.random() * 100)}`
+            ];
+            
+            suggestions.forEach(s => {
+                const span = document.createElement('span');
+                span.className = 'suggestion';
+                span.textContent = `${s}@comet.com`;
+                span.onclick = () => {
+                    usernameInput.value = s;
+                    usernameError.style.display = 'none';
+                };
+                suggestionsContainer.appendChild(span);
+            });
+        }
+        
+        firstNameInput.addEventListener('blur', generateUsernames);
+        lastNameInput.addEventListener('blur', generateUsernames);
+
+        async function isUsernameTaken(username) {
+            const docRef = db.collection('users').doc(`${username}@comet.com`);
+            const docSnap = await docRef.get();
+            return docSnap.exists; // <-- FIX WAS APPLIED HERE
+        }
+
+        usernameInput.addEventListener('blur', async () => {
+            const username = usernameInput.value.trim();
+            if (username) {
+                if (await isUsernameTaken(username)) {
+                    usernameError.textContent = 'That username is taken. Try another.';
+                    usernameError.style.display = 'block';
+                } else {
+                    usernameError.style.display = 'none';
+                }
+            }
+        });
+        
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            let isValid = true;
+            passwordError.style.display = 'none';
+            usernameError.style.display = 'none';
+
+            if (passwordInput.value.length < 8) {
+                passwordError.textContent = 'Password must be at least 8 characters.';
+                passwordError.style.display = 'block';
+                isValid = false;
+            } else if (passwordInput.value !== confirmPasswordInput.value) {
+                passwordError.textContent = 'Passwords do not match.';
+                passwordError.style.display = 'block';
+                isValid = false;
+            }
+
+            const username = usernameInput.value.trim();
+            if (!username) {
+                usernameError.textContent = 'Please choose a Comet ID.';
+                usernameError.style.display = 'block';
+                isValid = false;
+            } else if (await isUsernameTaken(username)) {
+                usernameError.textContent = 'That username is taken. Try another.';
+                usernameError.style.display = 'block';
+                isValid = false;
+            }
+            
+            const requiredFields = form.querySelectorAll('[required]');
+            requiredFields.forEach(field => {
+                if (!field.value) {
+                    isValid = false;
+                }
+            });
+            
+            if (!isValid) return;
+
+            const cometId = `${username}@comet.com`;
+            const userData = {
+                firstName: firstNameInput.value.trim(),
+                lastName: lastNameInput.value.trim(),
+                dob: document.getElementById('dob').value,
+                gender: document.querySelector('input[name="gender"]:checked').value,
+                cometId: cometId,
+                password: passwordInput.value,
+            };
+
+            try {
+                await db.collection('users').doc(cometId).set(userData);
+                
+                localStorage.setItem('cometId', cometId);
+                window.location.href = '3.html';
+
+            } catch (error) {
+                console.error("Error creating account:", error);
+                usernameError.textContent = 'Could not create account. Please try again.';
+                usernameError.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
