@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perplexity Store - Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 32px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h3 {
+            color: #667eea;
+            font-size: 36px;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .filters {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active,
+        .filter-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .companies-container {
+            display: grid;
+            gap: 20px;
+        }
+
+        .company-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .company-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .company-title {
+            flex: 1;
+        }
+
+        .company-title h2 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .company-title .legal-name {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        .status-badge.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-badge.approved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.denied {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .company-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .detail-item {
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .detail-item strong {
+            display: block;
+            color: #667eea;
+            font-size: 12px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .detail-item span {
+            color: #333;
+            font-size: 14px;
+        }
+
+        .branding-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .branding-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .branding-preview {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .branding-preview img {
+            max-width: 150px;
+            max-height: 100px;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .color-preview {
+            padding: 15px 25px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .btn-approve {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-approve:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-deny {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-deny:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+        }
+
+        .btn-reset {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-reset:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 193, 7, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .empty-state {
+            background: white;
+            padding: 60px 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .empty-state h3 {
+            color: #667eea;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            color: #666;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .loading h3 {
+            color: #667eea;
+            font-size: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .company-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .action-buttons {
+                width: 100%;
+            }
+
+            .btn {
+                flex: 1;
+            }
+        }
+
+        .timestamp {
+            color: #999;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🛍️ Perplexity Store Admin</h1>
+        <p>Company Management Dashboard</p>
+    </div>
+
+    <div class="stats" id="stats">
+        <div class="stat-card">
+            <h3 id="totalCount">0</h3>
+            <p>Total Applications</p>
+        </div>
+        <div class="stat-card">
+            <h3 id="pendingCount">0</h3>
+            <p>Pending Review</p>
+        </div>
+        <div class="stat-card">
+            <h3 id="approvedCount">0</h3>
+            <p>Approved</p>
+        </div>
+        <div class="stat-card">
+            <h3 id="deniedCount">0</h3>
+            <p>Denied</p>
+        </div>
+    </div>
+
+    <div class="filters">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="pending">Pending</button>
+        <button class="filter-btn" data-filter="approved">Approved</button>
+        <button class="filter-btn" data-filter="denied">Denied</button>
+    </div>
+
+    <div class="loading" id="loading">
+        <h3>Loading companies...</h3>
+    </div>
+
+    <div class="companies-container" id="companiesContainer"></div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, onSnapshot, doc, updateDoc, serverTimestamp, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBTLfh9-p5bEdmRjk-1pfifKxmKbnjNQo4",
+            authDomain: "mn-assats.firebaseapp.com",
+            projectId: "mn-assats",
+            storageBucket: "mn-assats.firebasestorage.app",
+            messagingSenderId: "608226708515",
+            appId: "1:608226708515:web:9645d4a4f44eab0fd47596",
+            measurementId: "G-170CCKFQPL"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let allCompanies = [];
+        let currentFilter = 'all';
+
+        const loading = document.getElementById('loading');
+        const companiesContainer = document.getElementById('companiesContainer');
+        const filterButtons = document.querySelectorAll('.filter-btn');
+
+        filterButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.getAttribute('data-filter');
+                renderCompanies();
+            });
+        });
+
+        const q = query(collection(db, 'companies'), orderBy('createdAt', 'desc'));
+
+        onSnapshot(q, (snapshot) => {
+            allCompanies = [];
+            snapshot.forEach((doc) => {
+                allCompanies.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
+            });
+            loading.style.display = 'none';
+            updateStats();
+            renderCompanies();
+        }, (error) => {
+            console.error('Error fetching companies:', error);
+            loading.innerHTML = '<h3 style="color: #dc3545;">Error loading data. Please refresh the page.</h3>';
+        });
+
+        function updateStats() {
+            const total = allCompanies.length;
+            const pending = allCompanies.filter(c => c.status === 'pending').length;
+            const approved = allCompanies.filter(c => c.status === 'approved').length;
+            const denied = allCompanies.filter(c => c.status === 'denied').length;
+
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('pendingCount').textContent = pending;
+            document.getElementById('approvedCount').textContent = approved;
+            document.getElementById('deniedCount').textContent = denied;
+        }
+
+        function renderCompanies() {
+            const filteredCompanies = currentFilter === 'all' 
+                ? allCompanies 
+                : allCompanies.filter(c => c.status === currentFilter);
+
+            if (filteredCompanies.length === 0) {
+                companiesContainer.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No Companies Found</h3>
+                        <p>There are no ${currentFilter === 'all' ? '' : currentFilter} companies at the moment.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            companiesContainer.innerHTML = filteredCompanies.map(company => `
+                <div class="company-card">
+                    <div class="company-header">
+                        <div class="company-title">
+                            <h2>${company.personalDetails.companyName}</h2>
+                            <p class="legal-name">Legal Name: ${company.personalDetails.legalName}</p>
+                        </div>
+                        <span class="status-badge ${company.status}">${company.status}</span>
+                    </div>
+
+                    <div class="company-details">
+                        <div class="detail-item">
+                            <strong>Email</strong>
+                            <span>${company.personalDetails.email}</span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Mobile</strong>
+                            <span>${company.personalDetails.mobile}</span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Country</strong>
+                            <span>${company.personalDetails.country}</span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Postal Code</strong>
+                            <span>${company.personalDetails.postalCode}</span>
+                        </div>
+                    </div>
+
+                    <div class="detail-item">
+                        <strong>Address</strong>
+                        <span>${company.personalDetails.address}</span>
+                    </div>
+
+                    <div class="detail-item" style="margin-top: 15px;">
+                        <strong>Description</strong>
+                        <span>${company.personalDetails.description}</span>
+                    </div>
+
+                    <div class="branding-section">
+                        <h3>🎨 Branding Details</h3>
+                        <div class="branding-preview">
+                            <div>
+                                <strong style="font-size: 12px; color: #667eea;">Logo</strong><br>
+                                <img src="${company.brandingDetails.logoUrl}" alt="Logo" onerror="this.style.display='none'">
+                            </div>
+                            <div>
+                                <strong style="font-size: 12px; color: #667eea;">Banner</strong><br>
+                                <img src="${company.brandingDetails.bannerUrl}" alt="Banner" onerror="this.style.display='none'">
+                            </div>
+                            <div>
+                                <strong style="font-size: 12px; color: #667eea;">Brand Color</strong><br>
+                                <div class="color-preview" style="background: ${company.brandingDetails.brandColor};">
+                                    ${company.brandingDetails.brandColor}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timestamp">
+                        Registered: ${company.createdAt ? new Date(company.createdAt.seconds * 1000).toLocaleString() : 'N/A'}
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-approve" onclick="updateStatus('${company.id}', 'approved')" 
+                                ${company.status === 'approved' ? 'disabled' : ''}>
+                            ✓ Approve
+                        </button>
+                        <button class="btn btn-deny" onclick="updateStatus('${company.id}', 'denied')"
+                                ${company.status === 'denied' ? 'disabled' : ''}>
+                            ✗ Deny
+                        </button>
+                        <button class="btn btn-reset" onclick="updateStatus('${company.id}', 'pending')"
+                                ${company.status === 'pending' ? 'disabled' : ''}>
+                            ↻ Reset to Pending
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.updateStatus = async (companyId, newStatus) => {
+            const companyRef = doc(db, 'companies', companyId);
+            try {
+                await updateDoc(companyRef, {
+                    status: newStatus,
+                    updatedAt: serverTimestamp()
+                });
+                console.log(`Company ${companyId} status updated to ${newStatus}`);
+            } catch (error) {
+                console.error('Error updating status:', error);
+                alert('Error updating status. Please try again.');
+            }
+        };
+    </script>
+</body>
+              </html>
