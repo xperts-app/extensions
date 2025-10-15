@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Company Login</title>
+<style>
+body{font-family:sans-serif;background:#f3f4f6;display:flex;justify-content:center;align-items:center;height:100vh;margin:0}
+.card{background:#fff;padding:30px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.1);width:320px;text-align:center}
+input{width:100%;padding:10px;margin:10px 0;border-radius:8px;border:1px solid #ccc}
+button{width:100%;padding:10px;background:#2563eb;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:bold}
+.error{color:red;font-size:13px;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="card">
+<h2>Company Login</h2>
+<input type="email" id="email" placeholder="Email">
+<input type="password" id="password" placeholder="Password">
+<button id="loginBtn">Login</button>
+<div class="error" id="error"></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.24.0/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.24.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBTLfh9-p5bEdmRjk-1pfifKxmKbnjNQo4",
+  authDomain: "mn-assats.firebaseapp.com",
+  projectId: "mn-assats",
+  storageBucket: "mn-assats.firebasestorage.app",
+  messagingSenderId: "608226708515",
+  appId: "1:608226708515:web:9645d4a4f44eab0fd47596",
+  measurementId: "G-170CCKFQPL"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+document.getElementById("loginBtn").addEventListener("click", async ()=>{
+  const email=document.getElementById("email").value.trim();
+  const password=document.getElementById("password").value.trim();
+  const err=document.getElementById("error");
+  err.textContent="";
+
+  const snap=await getDocs(collection(db,"companies"));
+  let found=false, id="";
+  snap.forEach(doc=>{
+    const d=doc.data();
+    if(d.personalDetails?.email===email && d.personalDetails?.password===password){
+      found=true; id=doc.id;
+    }
+  });
+
+  if(found){
+    localStorage.setItem("companyId",id);
+    window.location="2.html";
+  } else err.textContent="Invalid credentials!";
+});
+</script>
+</body>
+</html>
