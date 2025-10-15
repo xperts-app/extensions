@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>App Manager</title>
+<style>
+body{font-family:system-ui;background:#f9fafb;margin:0;padding:20px}
+h1{color:#111827}
+.card{background:#fff;padding:20px;margin:10px 0;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,0.05)}
+input,textarea{width:100%;padding:10px;margin:5px 0 12px;border:1px solid #ccc;border-radius:8px}
+button{padding:10px 14px;background:#2563eb;color:#fff;border:none;border-radius:8px;cursor:pointer;margin-right:8px}
+#appsList{margin-top:20px}
+</style>
+</head>
+<body>
+<h1>📱 Manage Your Apps</h1>
+<div class="card">
+  <h3>Add / Edit App</h3>
+  <input id="appId" type="hidden">
+  <input id="appName" placeholder="App Name">
+  <input id="logo" placeholder="Logo URL">
+  <textarea id="description" placeholder="Description"></textarea>
+  <input id="version" placeholder="Version">
+  <input id="category" placeholder="Category">
+  <select id="type">
+    <option>App</option>
+    <option>Game</option>
+  </select>
+  <textarea id="screenshots" placeholder="Screenshot URLs (comma separated)"></textarea>
+  <textarea id="whatsNew" placeholder="What's New (optional for edit)"></textarea>
+  <button id="saveBtn">Save App</button>
+  <button id="clearBtn">Clear</button>
+</div>
+<h2>Your Apps</h2>
+<div id="appsList"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.24.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/9.24.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBTLfh9-p5bEdmRjk-1pfifKxmKbnjNQo4",
+  authDomain: "mn-assats.firebaseapp.com",
+  projectId: "mn-assats",
+  storageBucket: "mn-assats.firebasestorage.app",
+  messagingSenderId: "608226708515",
+  appId: "1:608226708515:web:9645d4a4f44eab0fd47596",
+  measurementId: "G-170CCKFQPL"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const companyId = localStorage.getItem("companyId");
+if(!companyId) window.location="login.html";
+
+async function loadApps(){
+  const appsDiv=document.getElementById("appsList");
+  appsDiv.innerHTML="";
+  const snap=await getDocs(collection(db,"apps"));
+  snap.forEach(docu=>{
+    const d=docu.data();
+    if(d.companyId===companyId){
+      const div=document.createElement("div");
+      div.className="card";
+      div.innerHTML=`<b>${d.name}</b> (v${d.version})<br>${d.description}<br>
+      <button onclick="editApp('${docu.id}','${d.name}','${d.logo}','${d.description}','${d.version}','${d.category}','${d.type}','${(d.screenshots||[]).join(',')}','${d.whatsNew||''}')">Edit</button>`;
+      appsDiv.appendChild(div);
+    }
+  });
+}
+
+window.editApp=function(id,n,l,desc,v,c,t,s,w){
+  document.getElementById("appId").value=id;
+  document.getElementById("appName").value=n;
+  document.getElementById("logo").value=l;
+  document.getElementById("description").value=desc;
+  document.getElementById("version").value=v;
+  document.getElementById("category").value=c;
+  document.getElementById("type").value=t;
+  document.getElementById("screenshots").value=s;
+  document.getElementById("whatsNew").value=w;
+}
+
+document.getElementById("clearBtn").onclick=()=>document.querySelectorAll('input,textarea').forEach(e=>e.value="");
+
+document.getElementById("saveBtn").onclick=async()=>{
+  const id=document.getElementById("appId").value;
+  const data={
+    companyId,
+    name:document.getElementById("appName").value,
+    logo:document.getElementById("logo").value,
+    description:document.getElementById("description").value,
+    version:document.getElementById("version").value,
+    category:document.getElementById("category").value,
+    type:document.getElementById("type").value,
+    screenshots:document.getElementById("screenshots").value.split(','),
+    whatsNew:document.getElementById("whatsNew").value
+  };
+  if(id){
+    await updateDoc(doc(db,"apps",id),data);
+  }else{
+    await addDoc(collection(db,"apps"),data);
+  }
+  alert("Saved!");
+  loadApps();
+};
+
+loadApps();
+</script>
+</body>
+</html>
